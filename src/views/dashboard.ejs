@@ -1,0 +1,105 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link rel="shortcut icon" href="/src/public/favicon.ico" type="image/x-icon">
+    <title>
+        WhatsApp Bot | Dashboard
+    </title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-md py-4">
+            <div class="container mx-auto px-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">
+                    <a href="/">
+                        Dashboard
+                    </a>
+                </h1>
+                <div class="flex items-center space-x-4">
+                    <img alt="User profile picture" class="w-10 h-10 rounded-full" height="40"
+                        src="https://storage.googleapis.com/a1aa/image/cuqTdx3Kvoo3DdF4EEzyRtWLFDn5btR27NTZIaLMZM4L8veJA.jpg"
+                        width="40" />
+                        <div class="">
+                            <p>Halo, Admin</p>
+                            <button type="submit" id="logout" class="text-red-700">Logout</button>
+                        </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <div>
+            <!-- Dashboard Content -->
+            <main class="p-6 w-full justify-center align-center">
+                <div class="w-2/3 mx-auto text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <div class="items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-semibold text-gray-700">
+                                    WhatsApp Bot
+                                </h1>
+                                <br>
+                                <p class="text-2xl font-bold text-gray-800">
+                                    <!-- QR Code container where the dynamic QR will be inserted -->
+                                <div id="qrcode-container" class="place-self-center"></div>
+                                <p id="qr-status">Creating QRCode...</p>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</body>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+    const socket = io('http://localhost:8080');
+
+    // Ketika event 'qr' diterima dari server, tampilkan QR Code
+    socket.on('qr', (qr) => {
+        const qrCodeContainer = document.getElementById('qrcode-container');
+        const qrStatus = document.getElementById('qr-status');
+
+        qrCodeContainer.innerHTML = '';
+        qrStatus.innerText = 'Scan this QR code to login';
+
+        const img = document.createElement('img')
+        img.src = qr;
+        img.alt = 'QR Code';
+        img.width = 200;
+        img.height = 200;
+        qrCodeContainer.appendChild(img);
+    });
+    const logoutButton = document.getElementById('logout')
+    logoutButton.addEventListener('click', () => {
+        const userConfirm = confirm('Are you sure want to logout?')
+        if(userConfirm){
+            window.location.href = '/logout'
+        }
+    })
+
+    // Event untuk memberi tahu bahwa WhatsApp sudah siap
+    socket.on('login', (data) => {
+        document.getElementById('qr-status').innerText = `Logged in as: ${data.clientNumber}`;
+    });
+
+    socket.on('logout', () => {
+        document.getElementById('qr-status').innerText = `You're logged out. Please scan the QR code to log in again.`;
+    });
+</script>
+
+</html>
